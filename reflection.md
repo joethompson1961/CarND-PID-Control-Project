@@ -42,9 +42,11 @@ Holding Kp, Kd and speed at those values I then introduce the integral element, 
 
 In the beginning I manually experimented with various coeffient values to find a set that looked pretty good.  I then increased the target speed and found the results to be less desirable.
 
-To better fine tune the controller at higher speeds I found it important to have an objective method for evaulating the results. I implemented a scoring method that calculated 2 values over a fixed number of measurements steps (approximately 1 lap around the course):
-- accumulated cross-track error - the sum of all the absolute values of cross track error for an entire lap.
-- max cross-track error - the maximum absolute value of cross track error for an entire lap.
+To better fine tune the controller at higher speeds I found it important to have an objective method for evaluating the results. I implemented a scoring method that calculated 2 values over a fixed number of measurements steps (approximately 1 lap around the course):
+- **accumulated cross-track error** - the sum of all the absolute values of cross track error at each measurement step for an entire lap.
+- **max cross-track error** - the maximum absolute value of cross track error for an entire lap.
 The goal is to find the set of coefficients that yield the lowest overall score for both values.
 
-Using this scoring method I increased the speed to 45 MPH and manually tried a variety of different coefficient values in a way similar to twiddle, recordin the scores after each lap.  After a decent score was achieved I was able to increase the speed even further and still navigate the course successfully.  It was able to run reliably for many laps at 55MPH. 65MPH was the highest speed it could handle though it eventually crashed.
+Using this scoring method I increased the speed to 45 MPH and manually tried a variety of different coefficient values in a way similar to twiddle, recording the scores after each lap.  I noted that the resulting score varied some even when re-run with the same coefficient values and speed; this is possibly due to the simulator having some random element in it's behavioral model of the car.  This might have made it more difficult to get a good outcome with an automated twiddle.
+
+After the best score was achieved I was able to increase the target speed to 55MPH and still navigate the course reliably for many laps. 65MPH was the highest speed tested; it completed a lap but then crashed.
