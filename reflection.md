@@ -27,7 +27,7 @@ Holding and Kp and speed at those values I then began incrementing the different
 5. 30 MPH, Kp = 0.1, Ki = 0.0,  **Kd = 0.5**:
   - This significantly damped the steering oscillations, significantly reducing the over and under shoot of the proportional part of the controller.  The car completes a loop though not without some close calls. 
 
-Holding Kp, Kd and speed at those values I think introduce the integral element, Ki, to the controller, adjusting it in steps.
+Holding Kp, Kd and speed at those values I then introduce the integral element, Ki, to the controller, adjusting it in steps.
 
 6. 30 MPH, Kp = 0.1, **Ki = 0.1**,  Kd = 0.5:
   - The steering immediately begins oscillating wildly.  
