@@ -32,13 +32,63 @@ int main()
 {
   uWS::Hub h;
 
-  PID pid_steer;
-  pid_steer.Init(0.15d, 0.000001f, 3.5f);
+  PID pid_steer;                          //  accum_cte    max_cte   (lowest scores win)
+  pid_steer.Init(0.11f, 0.000000f, 3.0f); //
+  pid_steer.Init(0.11f, 0.000001f, 3.0f); //
+  pid_steer.Init(0.11f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.11f, 0.000000f, 2.0f); //
+  pid_steer.Init(0.13f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.15f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.17f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.20f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.25f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.25f, 0.000001f, 2.5f); //
+  pid_steer.Init(0.25f, 0.000001f, 1.5f); //    CRASH
+  pid_steer.Init(0.25f, 0.000001f, 2.25f);//
+  pid_steer.Init(0.25f, 0.000001f, 1.9f); //
+  pid_steer.Init(0.25f, 0.000001f, 2.1f); //
+  pid_steer.Init(0.30f, 0.000001f, 2.0f); //    CRASH
+  pid_steer.Init(0.275f, 0.000001f, 2.0f);//    CRASH
+  pid_steer.Init(0.24f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.26f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.25f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.25f, 0.000001f, 2.0f); //
+  pid_steer.Init(0.25f, 0.001000f, 2.0f); //    CRASH
+  pid_steer.Init(0.24f, 0.000001f, 2.0f); //    733.672   2.2559
+  pid_steer.Init(0.11f, 0.000001f, 2.0f); //    1070.26   2.8449
+  pid_steer.Init(0.11f, 0.000010f, 2.0f); //    1023.3    2.5364
+  pid_steer.Init(0.11f, 0.000100f, 2.0f); //    855.619   2.957
+  pid_steer.Init(0.11f, 0.001000f, 2.0f); //    761.409   2.4297
+  pid_steer.Init(0.11f, 0.010000f, 2.0f); //    1209.05   2.8223
+  pid_steer.Init(0.11f, 0.005000f, 2.0f); //    657.603   2.0868
+  pid_steer.Init(0.11f, 0.007500f, 2.0f); //    770.556   2.115
+  pid_steer.Init(0.11f, 0.006000f, 2.0f); //    658.555   2.1434
+  pid_steer.Init(0.11f, 0.004000f, 2.0f); //    667.891   1.6225
+  pid_steer.Init(0.11f, 0.004500f, 2.0f); //    635.753   1.8915
+  pid_steer.Init(0.25f, 0.004500f, 2.0f); //    CRASH
+  pid_steer.Init(0.135f,0.004500f, 2.0f); //    608.899   1.6933
+  pid_steer.Init(0.16f, 0.004500f, 2.0f); //    607.791   1.7177
+  pid_steer.Init(0.15f, 0.001000f, 2.0f); //    633.252   2.4016
+  pid_steer.Init(0.15f, 0.000100f, 2.0f); //    711.334   2.4
+  pid_steer.Init(0.15f, 0.004500f, 2.0f); //    589.445   1.7385
+  pid_steer.Init(0.15f, 0.004500f, 2.1f); //    614.7     1.7751
+  pid_steer.Init(0.15f, 0.004500f, 2.25f);//    603.385   2.039
+  pid_steer.Init(0.15f, 0.004500f, 2.5f); //    585.164   1.9066
+  pid_steer.Init(0.15f, 0.004500f, 2.6f); //    563.991   1.8624
+  pid_steer.Init(0.15f, 0.004500f, 3.0f); //    557.061   2.1939
+  pid_steer.Init(0.15f, 0.004500f, 2.75f);//    619.778   2.4285
+  pid_steer.Init(0.15f, 0.004500f, 2.6f); //    582.937   2.3804
+  pid_steer.Init(0.15f, 0.004500f, 2.6f); //    600.621   2.2021
+  pid_steer.Init(0.15f, 0.004500f, 2.5f); //    556.127   2.204    THE WINNER!!
 
   PID pid_throttle;
-  pid_throttle.Init(0.9f, 0.0f, 0.1f);
+  pid_throttle.Init(0.9f, 0.000001f, 0.5f);
 
-  h.onMessage([&pid_steer, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  int measurement_cnt = 0;
+  double accum_cte = 0.0f;
+  double max_cte = 0.0f;
+
+  h.onMessage([&pid_steer, &pid_throttle, &measurement_cnt, &accum_cte, &max_cte](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -55,10 +105,21 @@ int main()
 //          double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
 
+#if 0 // scoring pid coefficients
+          // Print score for one lap
+          int one_lap = 1700;
+          if (fabs(steer_cte) > max_cte)
+              max_cte = fabs(steer_cte); // used to measure quality of PID controller over a single lap.
+          accum_cte += fabs(steer_cte);  // used to measure quality of PID controller over a single lap.
+          measurement_cnt += 1;         // used to measure quality of PID controller over a single lap.
+          if (measurement_cnt >= one_lap) {
+              std::cout << "Lap end Total CTE: " << accum_cte << " Max CTE: " << max_cte << std::endl;
+              return;
+          }
+#endif
+
           /*
-          * Calculate steering value here, remember the steering value range is [-1, 1].
-          *
-          * Play around with the throttle and speed. Maybe use another PID controller to control the speed!
+          * Calculate steering value here. Steering value range is [-1, 1].
           */
           pid_steer.UpdateError(steer_cte);
           steer_value = pid_steer.TotalError();
@@ -66,8 +127,9 @@ int main()
               steer_value = 1.0f;
           if (steer_value < -1.0f)
               steer_value = -1.0f;
-          
-          double speed_tgt = 45.0f;
+
+          // Using a 2nd PID controller to control the speed.
+          double speed_tgt = 55.0f;   // Made it around that track at 65 once, but not reliably
           double throttle_cte = speed - speed_tgt;
           double throttle_value;
           pid_throttle.UpdateError(throttle_cte);
@@ -77,15 +139,16 @@ int main()
           if (throttle_value < 0.0f)
               throttle_value = 0.0f;
 
-          // DEBUG
+#if 0  // DEBUG
           std::cout << "Steer CTE:    " << steer_cte    << " Steering Value: " << steer_value << std::endl;
-          std::cout << "Throttle CTE: " << throttle_cte << " Throttle Value: " << throttle_value << " Speed: " << speed << std::endl << std::endl;
+          std::cout << "Throttle CTE: " << throttle_cte << " Throttle Value: " << throttle_value << " Speed: " << speed << std::endl;
+#endif
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+//          std::cout << msg << std::endl << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
